@@ -1,0 +1,10 @@
+CREATE TABLE [dbo].[movies2](
+	[movie] [varchar](200) NULL,
+	[title] [varchar](200) NULL,
+	[genres] [varchar](50) NULL,
+	[year] [varchar](50) NULL,
+	[rating] [varchar](50) NULL,
+	[rotton tomato] [varchar](50) NULL
+) ON [PRIMARY]
+GO
+

@@ -1,0 +1,54 @@
+blob_account_name = "storageteste123a"
+blob_container_name = "staging"
+blob_relative_path = "/"
+blob_sas_token = r"TOKEN_AQUI"
+arquivo = "moviesdb.csv"
+
+--------------------------------------------
+
+wasbs_path = 'wasbs://%s@%s.blob.core.windows.net/%s' % (blob_container_name, blob_account_name, blob_relative_path)
+spark.conf.set('fs.azure.sas.%s.%s.blob.core.windows.net' % (blob_container_name, blob_account_name), blob_sas_token)
+print('Remote blob path: ' + wasbs_path)
+
+--------------------------------------------
+
+df = spark.read.format("csv").option("header", "true").option("mode", "DROPMALFORMED").load(wasbs_path)
+df.createOrReplaceTempView('source')
+
+--------------------------------------------
+
+display(spark.sql('SELECT * FROM source'))
+
+--------------------------------------------
+
+from pyspark.sql import *
+import pandas as pd
+
+jdbcHostname = "SERVER_BANCO_AQUI"
+jdbcPort = 1433
+jdbcDatabase = "NOME_BANCO_AQUI"
+username =  "USUARIO_BANCO_AQUI"
+password = "SENHA_BANCO_AQUI"
+
+--------------------------------------------
+
+jdbcUrl = "jdbc:sqlserver://{0}:{1};database={2}".format(jdbcHostname, jdbcPort, jdbcDatabase)
+print(jdbcUrl)
+connectionProperties = {
+  "user" : username,
+  "password" : password,
+  "driver" : "com.microsoft.sqlserver.jdbc.SQLServerDriver"
+} 
+
+
+--------------------------------------------
+
+pushdown_query = "(select * from SalesLt.Product) Product"
+df2 = spark.read.jdbc(url=jdbcUrl, table=pushdown_query, properties=connectionProperties)
+display(df2)
+
+--------------------------------------------
+
+mydf = sqlContext.read.csv(wasbs_path,header=True)
+myfinaldf = DataFrameWriter(mydf)
+myfinaldf.jdbc(url=jdbcUrl, table= "movies2", mode ="overwrite", properties = connectionProperties)

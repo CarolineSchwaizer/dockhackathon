@@ -1,0 +1,35 @@
+CREATE TABLE events
+USING delta
+PARTITIONED BY (date)
+SELECT action, from_unixtime(time, 'yyyy-MM-dd') as date
+FROM json.`/databricks-datasets/structured-streaming/events/`;
+
+
+
+SELECT * FROM events
+
+
+SELECT date, action, count(action) AS action_count FROM events GROUP BY action, date ORDER BY date, action
+
+
+INSERT INTO events
+SELECT action, from_unixtime(time-172800, 'yyyy-MM-dd') as date
+FROM json.`/databricks-datasets/structured-streaming/events/`;
+
+
+SELECT date, action, count(action) AS action_count FROM events GROUP BY action, date ORDER BY date, action
+
+
+DESCRIBE EXTENDED events PARTITION (date='2016-07-25')
+
+
+OPTIMIZE events
+
+
+DESCRIBE HISTORY events
+
+
+DESCRIBE DETAIL events
+
+
+DESCRIBE FORMATTED events
